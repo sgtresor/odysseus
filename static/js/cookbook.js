@@ -622,6 +622,21 @@ async function _fetchDependencies() {
         _addTask(data.session_id, 'pip ' + pkgName, 'download', payload);
         if (statusEl) { statusEl.textContent = upgrade ? 'Updating...' : 'Installing...'; statusEl.disabled = true; }
         uiModule.showToast(`${upgrade ? 'Updating' : 'Installing'} ${pkgName} on ${targetHost}...`);
+
+        // Poll until the pip task finishes, then refresh the deps list so the
+        // status badge updates from "Install" / "Installing…" → "Installed".
+        const _depSessionId = data.session_id;
+        const _depPoll = setInterval(async () => {
+          try {
+            const pr = await fetch('/api/cookbook/tasks/status', { credentials: 'same-origin' });
+            const pd = await pr.json().catch(() => ({}));
+            const task = (pd.tasks || []).find(t => t.session_id === _depSessionId);
+            if (task && ['completed', 'stopped', 'error'].includes(task.status)) {
+              clearInterval(_depPoll);
+              await _fetchDependencies();
+            }
+          } catch (_) { clearInterval(_depPoll); }
+        }, 3000);
       } catch (err) {
         uiModule.showToast('Install failed: ' + err.message);
       }
