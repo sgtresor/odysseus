@@ -783,7 +783,7 @@ export async function _serveAutoFix(panel, envVar) {
   if (task.remoteHost) _envState.remoteHost = task.remoteHost;
   try {
     uiModule.showToast(`Retrying with ${envVar}...`);
-    await _launchServeTask(task.name, task.payload.repo_id, newCmd);
+    await _launchServeTask(task.name, task.payload.repo_id || task.payload.model || task.name, newCmd);
   } finally {
     // Always restore — otherwise a thrown launch leaves the global host stuck
     // on this serve task, so later downloads/scans hit it.
@@ -853,7 +853,7 @@ export async function _serveAutoRetryReplace(panel, flag, value) {
   if (task.remoteHost) _envState.remoteHost = task.remoteHost;
   try {
     uiModule.showToast(`Retrying with ${flag} ${value}...`);
-    await _launchServeTask(task.name, task.payload.repo_id, newCmd);
+    await _launchServeTask(task.name, task.payload.repo_id || task.payload.model || task.name, newCmd);
   } finally {
     _envState.remoteHost = origHost;
   }
@@ -886,7 +886,7 @@ export async function _serveAutoRetryRemove(panel, flag) {
   if (task.remoteHost) _envState.remoteHost = task.remoteHost;
   try {
     uiModule.showToast(`Retrying without ${flag}...`);
-    await _launchServeTask(task.name, task.payload.repo_id, newCmd);
+    await _launchServeTask(task.name, task.payload.repo_id || task.payload.model || task.name, newCmd);
   } finally {
     _envState.remoteHost = origHost;
   }
@@ -920,7 +920,7 @@ export async function _serveAutoRetry(panel, flag) {
   if (task.remoteHost) _envState.remoteHost = task.remoteHost;
   try {
     uiModule.showToast(`Retrying with ${flag}...`);
-    await _launchServeTask(task.name, task.payload.repo_id, newCmd);
+    await _launchServeTask(task.name, task.payload.repo_id || task.payload.model || task.name, newCmd);
   } finally {
     _envState.remoteHost = origHost;
   }
